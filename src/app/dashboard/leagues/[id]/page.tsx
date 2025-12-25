@@ -186,121 +186,122 @@ export default function LeaguePage() {
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             {/* Header */}
-            <div className="page-header">
+            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                 <div>
                     <Link href="/dashboard" style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem', display: 'block' }}>&larr; Back to Dashboard</Link>
                     <h1 className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: 'bold', lineHeight: '1.1' }}>{league?.name}</h1>
-
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    {/* Admin Access Code Display - Moved to Right */}
-                    {isOwner && league?.join_code && (
-                        <div style={{
-                            background: 'rgba(255,255,255,0.1)',
-                            padding: '0.3rem 0.8rem',
-                            borderRadius: '8px',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.6rem',
-                            marginRight: '0.5rem'
-                        }}>
-                            <span style={{ color: '#a1a1aa', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Join Code:</span>
-                            <span style={{ fontSize: '1rem', fontWeight: 'bold', letterSpacing: '0.2rem', fontFamily: 'monospace' }}>{league.join_code}</span>
-                            <button
-                                onClick={() => {
-                                    navigator.clipboard.writeText(league.join_code);
-                                    setCopied(true);
-                                    setTimeout(() => setCopied(false), 2000);
-                                }}
-                                style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    color: copied ? '#4ade80' : '#a1a1aa',
-                                    padding: '0.25rem',
-                                    marginLeft: '0.25rem'
-                                }}
-                                title="Copy Code"
-                            >
-                                {copied ? <Check size={14} /> : <Copy size={14} />}
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Admin Controls */}
-                    {isOwner && (
-                        <div style={{ display: 'flex', gap: '0.5rem', paddingRight: '1rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-                            <button
-                                onClick={toggleLock}
-                                disabled={togglingLock}
-                                title={isLocked ? "Unlock League" : "Lock League"}
-                                style={{
-                                    padding: '0.75rem',
-                                    borderRadius: '8px',
-                                    background: isLocked ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                    color: isLocked ? '#10b981' : '#ef4444',
-                                    border: `1px solid ${isLocked ? '#10b981' : '#ef4444'}`,
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    minWidth: '40px',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                {togglingLock ? <Loader2 className="animate-spin" size={18} /> : (isLocked ? <Unlock size={18} /> : <Lock size={18} />)}
-                            </button>
-
-                            <button
-                                onClick={toggleAnonymous}
-                                title={league.anonymous_mode ? "Show Names" : "Mask Names"}
-                                style={{ padding: '0.75rem', borderRadius: '8px', background: league.anonymous_mode ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.05)', color: league.anonymous_mode ? '#818cf8' : 'white', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
-                            >
-                                {league.anonymous_mode ? <EyeOff size={18} /> : <Eye size={18} />}
-                            </button>
-                            <button
-                                onClick={deleteLeague}
-                                disabled={deleting}
-                                title="Delete League"
-                                style={{ padding: '0.75rem', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', cursor: 'pointer' }}
-                            >
-                                <Trash2 size={18} />
-                            </button>
-                        </div>
-                    )}
-
-                    <button
-                        onClick={handleRefreshPrices}
-                        disabled={refreshing}
-                        title="Refresh Prices"
-                        style={{ padding: '0.75rem', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', color: 'white', border: 'none', cursor: 'pointer' }}
-                    >
-                        <RefreshCw size={20} className={refreshing ? "animate-spin" : ""} />
-                    </button>
-                    <Link
-                        href={`/dashboard/leagues/${params.id}/draft`}
-                        className="btn-primary"
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            background: 'linear-gradient(135deg, #34d399 0%, #22d3ee 100%)',
-                            color: '#0f172a',
-                            fontWeight: 'bold',
-                            border: 'none',
-                            padding: '0.75rem 1.5rem',
-                            borderRadius: '8px'
-                        }}
-                    >
-                        <User size={18} />
-                        My Portfolio
-                    </Link>
-                </div>
             </div>
+
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                {/* Admin Access Code Display - Moved to Right */}
+                {isOwner && league?.join_code && (
+                    <div style={{
+                        background: 'rgba(255,255,255,0.1)',
+                        padding: '0.3rem 0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.6rem',
+                        marginRight: '0.5rem'
+                    }}>
+                        <span style={{ color: '#a1a1aa', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Join Code:</span>
+                        <span style={{ fontSize: '1rem', fontWeight: 'bold', letterSpacing: '0.2rem', fontFamily: 'monospace' }}>{league.join_code}</span>
+                        <button
+                            onClick={() => {
+                                navigator.clipboard.writeText(league.join_code);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
+                            }}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                color: copied ? '#4ade80' : '#a1a1aa',
+                                padding: '0.25rem',
+                                marginLeft: '0.25rem'
+                            }}
+                            title="Copy Code"
+                        >
+                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                    </div>
+                )}
+
+                {/* Admin Controls */}
+                {isOwner && (
+                    <div style={{ display: 'flex', gap: '0.5rem', paddingRight: '1rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
+                        <button
+                            onClick={toggleLock}
+                            disabled={togglingLock}
+                            title={isLocked ? "Unlock League" : "Lock League"}
+                            style={{
+                                padding: '0.75rem',
+                                borderRadius: '8px',
+                                background: isLocked ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                color: isLocked ? '#10b981' : '#ef4444',
+                                border: `1px solid ${isLocked ? '#10b981' : '#ef4444'}`,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                minWidth: '40px',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            {togglingLock ? <Loader2 className="animate-spin" size={18} /> : (isLocked ? <Unlock size={18} /> : <Lock size={18} />)}
+                        </button>
+
+                        <button
+                            onClick={toggleAnonymous}
+                            title={league.anonymous_mode ? "Show Names" : "Mask Names"}
+                            style={{ padding: '0.75rem', borderRadius: '8px', background: league.anonymous_mode ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.05)', color: league.anonymous_mode ? '#818cf8' : 'white', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
+                        >
+                            {league.anonymous_mode ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                        <button
+                            onClick={deleteLeague}
+                            disabled={deleting}
+                            title="Delete League"
+                            style={{ padding: '0.75rem', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', cursor: 'pointer' }}
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    </div>
+                )}
+
+                <button
+                    onClick={handleRefreshPrices}
+                    disabled={refreshing}
+                    title="Refresh Prices"
+                    style={{ padding: '0.75rem', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', color: 'white', border: 'none', cursor: 'pointer' }}
+                >
+                    <RefreshCw size={20} className={refreshing ? "animate-spin" : ""} />
+                </button>
+                <Link
+                    href={`/dashboard/leagues/${params.id}/draft`}
+                    className="btn-primary"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        background: 'linear-gradient(135deg, #34d399 0%, #22d3ee 100%)',
+                        color: '#0f172a',
+                        fontWeight: 'bold',
+                        border: 'none',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '8px'
+                    }}
+                >
+                    <User size={18} />
+                    My Portfolio
+                </Link>
+            </div>
+
 
             {/* Leaderboard */}
             <div className="glass-panel" style={{ padding: '2rem' }}>
@@ -382,6 +383,6 @@ export default function LeaguePage() {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div >
     );
 }
