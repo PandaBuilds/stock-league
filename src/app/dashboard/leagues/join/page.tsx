@@ -33,11 +33,11 @@ export default function JoinLeaguePage() {
                 return;
             }
 
-            // 1. Get League (Validation)
+            // 1. Get League (Validation by 4-digit code)
             const { data: league, error: leagueError } = await supabase
                 .from('leagues')
                 .select('*')
-                .eq('id', leagueCode)
+                .eq('join_code', leagueCode)
                 .single();
 
             if (leagueError || !league) throw new Error('Invalid League Code');
@@ -90,11 +90,13 @@ export default function JoinLeaguePage() {
 
             <form onSubmit={handleJoin} className="glass-panel" style={{ padding: '2rem' }}>
                 <div style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1a1aa' }}>League Code (ID)</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1a1aa' }}>Enter 4-Digit Access Code</label>
                     <input
                         type="text"
                         value={leagueCode}
-                        onChange={e => setLeagueCode(e.target.value)}
+                        maxLength={4}
+                        placeholder="0000"
+                        onChange={e => setLeagueCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
                         required
                         style={{
                             width: '100%',
@@ -102,7 +104,11 @@ export default function JoinLeaguePage() {
                             borderRadius: '8px',
                             background: 'rgba(255,255,255,0.05)',
                             border: '1px solid rgba(255,255,255,0.1)',
-                            color: 'white'
+                            color: 'white',
+                            textAlign: 'center',
+                            fontSize: '1.5rem',
+                            letterSpacing: '0.5rem',
+                            fontWeight: 'bold'
                         }}
                     />
                 </div>

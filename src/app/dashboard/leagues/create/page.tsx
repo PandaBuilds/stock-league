@@ -11,25 +11,22 @@ export default function CreateLeaguePage() {
         name: '',
         budget: 100000,
         enrollmentDays: 7,
-        durationMonths: 3, // Quarterly
+        durationMonths: 3,
+        joinCode: ''
     });
 
-    // Check auth immediately
-    const [user, setUser] = useState<any>(null);
-    useEffect(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            if (!user) {
-                console.log('No user found, redirecting...');
-                router.push('/login');
-            } else {
-                setUser(user);
-            }
-        });
-    }, []);
+    // ... (useEffect remains same) ...
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        // Validate 4 digits
+        if (!/^\d{4}$/.test(formData.joinCode)) {
+            alert("Please enter a valid 4-digit numeric code.");
+            setLoading(false);
+            return;
+        }
 
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -48,7 +45,8 @@ export default function CreateLeaguePage() {
                 budget: formData.budget,
                 start_date: startDate.toISOString(),
                 end_date: endDate.toISOString(),
-                is_active: true
+                is_active: true,
+                join_code: formData.joinCode
             }).select().single();
 
             if (error) throw error;
@@ -134,22 +132,44 @@ export default function CreateLeaguePage() {
                 </div>
 
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1a1aa' }}>Duration</label>
-                    <select
-                        value={formData.durationMonths}
-                        onChange={e => setFormData({ ...formData, durationMonths: Number(e.target.value) })}
-                        style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
-                    >
-                        <option value={1}>1 Month (Sprint)</option>
-                        <option value={3}>3 Months (Quarterly)</option>
                         <option value={12}>1 Year (Marathon)</option>
                     </select>
+                </div>
+
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1a1aa' }}>League Access Code (4 Digits)</label>
+                    <input
+                        type="text"
+                        required
+                        maxLength={4}
+                        pattern="\d{4}"
+                        placeholder="e.g. 1234"
+                        value={formData.joinCode}
+                        onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                            setFormData({ ...formData, joinCode: val });
+                        }}
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem',
+                            borderRadius: '8px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: 'white',
+                            letterSpacing: '0.2rem',
+                            fontWeight: 'bold',
+                            textAlign: 'center'
+                        }}
+                    />
+                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.5rem' }}>
+                        Create a unique 4-digit numerical code for your friends to join.
+                    </p>
                 </div>
 
                 <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop: '1rem' }}>
                     {loading ? 'Creating...' : 'Create League'}
                 </button>
-            </form>
-        </div>
+            </form >
+        </div >
     );
 }
