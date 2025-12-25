@@ -55,10 +55,11 @@ export default function PortfolioPage() {
                     // Merge data
                     const unified = ports.map(p => {
                         const mem = members.find(m => m.id === p.member_id);
+                        const league = Array.isArray(mem?.leagues) ? mem.leagues[0] : mem?.leagues;
                         return {
                             ...p,
-                            leagueName: mem?.leagues?.name,
-                            leagueId: mem?.leagues?.id
+                            leagueName: league?.name,
+                            leagueId: league?.id
                         };
                     });
                     setPortfolios(unified);
