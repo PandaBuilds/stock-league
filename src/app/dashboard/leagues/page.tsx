@@ -44,10 +44,10 @@ export default function LeagueList() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>My Leagues</h2>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Link href="/dashboard/leagues/join" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', color: 'white' }}>
+                    <Link href="/dashboard/leagues/join" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', background: 'linear-gradient(135deg, #34d399 0%, #22d3ee 100%)', color: '#0f172a', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 'bold' }}>
                         Join League
                     </Link>
-                    <Link href="/dashboard/leagues/create" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', background: 'linear-gradient(135deg, #34d399 0%, #22d3ee 100%)', color: '#0f172a', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 'bold' }}>
+                    <Link href="/dashboard/leagues/create" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', color: 'white' }}>
                         <Plus size={16} /> Create League
                     </Link>
                 </div>
