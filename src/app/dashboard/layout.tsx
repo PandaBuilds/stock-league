@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
-import { LayoutDashboard, Trophy, PieChart, LogOut, Settings } from 'lucide-react';
+import { LayoutDashboard, Trophy, PieChart, LogOut, Settings, Newspaper } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
@@ -41,6 +41,7 @@ export default function DashboardLayout({
         { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
         { name: 'My Leagues', href: '/dashboard/leagues', icon: Trophy },
         { name: 'Portfolio', href: '/dashboard/portfolio', icon: PieChart },
+        { name: 'News', href: '/dashboard/news', icon: Newspaper }, // Added News
         { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ];
 
