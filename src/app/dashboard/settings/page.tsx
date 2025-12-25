@@ -100,7 +100,7 @@ export default function SettingsPage() {
                     type="submit"
                     className="btn-primary"
                     disabled={saving}
-                    style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+                    style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
                 >
                     {saving ? <Loader2 className="animate-spin" /> : 'Save Changes'}
                 </button>

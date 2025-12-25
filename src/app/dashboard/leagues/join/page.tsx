@@ -146,7 +146,7 @@ export default function JoinLeaguePage() {
                     type="submit"
                     className="btn-primary"
                     disabled={loading}
-                    style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+                    style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
                 >
                     {loading ? <Loader2 className="animate-spin" /> : 'Join Now'}
                 </button>
