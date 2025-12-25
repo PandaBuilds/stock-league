@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2, RefreshCw, Trophy, ArrowUpRight, ArrowDownRight, User, Trash2, Copy, Check, Eye, EyeOff } from 'lucide-react';
+import { Loader2, RefreshCw, Trophy, ArrowUpRight, ArrowDownRight, User, Trash2, Copy, Check, Eye, EyeOff, Lock, Unlock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LeaguePage() {
@@ -17,12 +17,13 @@ export default function LeaguePage() {
     const [isOwner, setIsOwner] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [togglingLock, setTogglingLock] = useState(false);
 
     const fetchLeagueData = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) setCurrentUser(user);
 
-        // 1. Get League (Including anonymous_mode)
+        // 1. Get League (Including anonymous_mode, is_locked)
         const { data: leagueData } = await supabase
             .from('leagues')
             .select('*')
@@ -143,6 +144,26 @@ export default function LeaguePage() {
         }
     };
 
+    const toggleLock = async () => {
+        if (!isOwner || !league) return;
+        setTogglingLock(true);
+        try {
+            const newStatus = !league.is_locked;
+            const { error } = await supabase
+                .from('leagues')
+                .update({ is_locked: newStatus })
+                .eq('id', league.id);
+
+            if (error) throw error;
+
+            setLeague({ ...league, is_locked: newStatus });
+        } catch (e: any) {
+            alert("Failed to toggle lock: " + e.message);
+        } finally {
+            setTogglingLock(false);
+        }
+    };
+
     const copyInvite = () => {
         const url = `${window.location.origin}/dashboard/leagues/join?code=${league.id}`;
         navigator.clipboard.writeText(url);
@@ -159,6 +180,8 @@ export default function LeaguePage() {
     };
 
     if (loading) return <div className="p-10 text-center">Loading League...</div>;
+
+    const isLocked = league?.is_locked;
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -211,6 +234,27 @@ export default function LeaguePage() {
                     {/* Admin Controls */}
                     {isOwner && (
                         <div style={{ display: 'flex', gap: '0.5rem', paddingRight: '1rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
+                            <button
+                                onClick={toggleLock}
+                                disabled={togglingLock}
+                                title={isLocked ? "Unlock League" : "Lock League"}
+                                style={{
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    background: isLocked ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                    color: isLocked ? '#10b981' : '#ef4444',
+                                    border: `1px solid ${isLocked ? '#10b981' : '#ef4444'}`,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    minWidth: '40px',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                {togglingLock ? <Loader2 className="animate-spin" size={18} /> : (isLocked ? <Unlock size={18} /> : <Lock size={18} />)}
+                            </button>
+
                             <button
                                 onClick={toggleAnonymous}
                                 title={league.anonymous_mode ? "Show Names" : "Mask Names"}

@@ -20,8 +20,8 @@ export default function DraftPage() {
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [copied, setCopied] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -62,18 +62,15 @@ export default function DraftPage() {
                         .eq('portfolio_id', portData.id);
 
                     if (holdings) {
-                        // Reverse engineer percentage from quantity? 
-                        // Qty * Price = Value. Value / Budget * 100 = %
                         const totalBudget = leagueData.budget;
-
                         const mapped = holdings.map(h => {
                             const val = h.quantity * h.avg_price;
-                            const pct = totalBudget ? (val / totalBudget) * 100 : 0; // Default to 0 if budget is somehow 0 to avoid NaN
+                            const pct = totalBudget ? (val / totalBudget) * 100 : 0;
                             return {
                                 symbol: h.stock_symbol,
                                 description: h.stocks?.name,
                                 price: h.avg_price,
-                                allocation: parseFloat(pct.toFixed(1)) // rounded
+                                allocation: parseFloat(pct.toFixed(1))
                             };
                         });
                         setSelectedStocks(mapped);
@@ -87,6 +84,8 @@ export default function DraftPage() {
 
     // Search logic
     useEffect(() => {
+        if (!league || league.is_locked) return; // Disable search if locked
+
         const delayDebounceFn = setTimeout(async () => {
             if (searchQuery.length < 2) {
                 setSearchResults([]);
@@ -101,9 +100,10 @@ export default function DraftPage() {
             finally { setIsSearching(false); }
         }, 500);
         return () => clearTimeout(delayDebounceFn);
-    }, [searchQuery]);
+    }, [searchQuery, league]);
 
     const addStock = async (stockResult: any) => {
+        if (league.is_locked) return;
         if (selectedStocks.find(s => s.symbol === stockResult.symbol)) return;
 
         try {
@@ -133,16 +133,17 @@ export default function DraftPage() {
     };
 
     const removeStock = (symbol: string) => {
+        if (league.is_locked) return;
         setSelectedStocks(selectedStocks.filter(s => s.symbol !== symbol));
     };
 
     const updateAllocation = (symbol: string, val: string) => {
+        if (league.is_locked) return;
+
         // Allow empty string to let user clear input
         if (val === '') {
             setSelectedStocks(selectedStocks.map(s =>
-                s.symbol === symbol ? { ...s, allocation: 0 } : s // or handle empty differently?? 
-                // Better: keep it as 0 or empty string if allowed.
-                // But my state expects number. Let's keep it 0 if empty for now or better
+                s.symbol === symbol ? { ...s, allocation: 0 } : s
             ));
             return;
         }
@@ -163,6 +164,10 @@ export default function DraftPage() {
 
     const savePortfolio = async () => {
         if (!portfolio || !league) return;
+        if (league.is_locked) {
+            alert("League is locked. You cannot save changes.");
+            return;
+        }
 
         if (Math.abs(totalAllocation - 100) > 0.1) {
             alert(`Total allocation must be 100%. Currently: ${totalAllocation.toFixed(1)}%`);
@@ -202,23 +207,14 @@ export default function DraftPage() {
                 await supabase.from('holdings').insert(holdingsToInsert);
             }
 
-            // Verify cash balance? In this model, we are fully invested or cash is 0?
-            // If <100% allowed, remainder is cash. But user said "allocate 20, 30..." implying 100 total.
-            // Let's set cash_balance based on remainder if we allow <100.
-            // For now, prompt strict 100%.
-
-            // Update portfolio cash (fake money spent)
-            // Actually, if we hold stocks, our cash balance goes down.
-            // Remaining cash = Budget - Allocated.
             const allocatedTotal = selectedStocks.reduce((sum, s) => sum + (league.budget * (s.allocation / 100)), 0);
             const remainingCash = league.budget - allocatedTotal;
 
             await supabase.from('portfolios').update({
                 cash_balance: remainingCash,
-                // total_value is strictly sum of holdings + cash. Since we just bought at current price, it equals budget.
             }).eq('id', portfolio.id);
 
-            alert("Reference saved! Good luck.");
+            alert("Portfolio saved successfully!");
             router.push('/dashboard/portfolio');
 
         } catch (e: any) {
@@ -228,93 +224,95 @@ export default function DraftPage() {
         }
     };
 
-    const deleteLeague = async () => {
-        if (!window.confirm("ARE YOU SURE? This will permanently delete this league and all portfolios within it. This action cannot be undone.")) return;
-        setDeleting(true);
-
-        try {
-            // Manual Cascade Delete
-            const { data: members } = await supabase.from('league_members').select('id').eq('league_id', league.id);
-            const memberIds = members?.map(m => m.id) || [];
-
-            if (memberIds.length > 0) {
-                const { data: portfolios } = await supabase.from('portfolios').select('id').in('member_id', memberIds);
-                const portfolioIds = portfolios?.map(p => p.id) || [];
-
-                if (portfolioIds.length > 0) {
-                    await supabase.from('holdings').delete().in('portfolio_id', portfolioIds);
-                    await supabase.from('portfolios').delete().in('id', portfolioIds);
-                }
-                await supabase.from('league_members').delete().eq('league_id', league.id);
-            }
-
-            const { error } = await supabase.from('leagues').delete().eq('id', league.id);
-            if (error) throw error;
-
-            router.push('/dashboard');
-
-        } catch (e: any) {
-            console.error(e);
-            alert("Failed to delete league: " + e.message);
-        } finally {
-            setDeleting(false);
-        }
-    };
-
-    const copyInvite = () => {
-        const url = `${window.location.origin}/dashboard/leagues/join?code=${league.id}`;
-        navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
     if (loading) return <div className="p-10 text-center">Loading...</div>;
 
+    const isLocked = league?.is_locked;
+
     return (
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h1 className="text-gradient" style={{ fontSize: '2rem', fontWeight: 'bold' }}>Draft Room</h1>
-                    <p style={{ color: '#a1a1aa' }}>{league?.name} • Budget: ${league?.budget?.toLocaleString()}</p>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
+            <header style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h1 className="text-gradient" style={{ fontSize: '2rem', fontWeight: 'bold' }}>Draft Room</h1>
+                        <p style={{ color: '#a1a1aa' }}>{league?.name} • Budget: ${league?.budget?.toLocaleString()}</p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        {/* Save Button (Only if NOT locked) */}
+                        {!isLocked && (
+                            <button
+                                onClick={savePortfolio}
+                                className="btn-primary" // Assuming global class or we style inline
+                                disabled={saving}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '140px', justifyContent: 'center',
+                                    background: 'linear-gradient(135deg, #34d399 0%, #22d3ee 100%)',
+                                    color: '#0f172a',
+                                    padding: '0.75rem 1.5rem',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {saving ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
+                                {saving ? 'Saving...' : 'Save Portfolio'}
+                            </button>
+                        )}
+                    </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button
-                        onClick={savePortfolio}
-                        className="btn-primary"
-                        disabled={saving}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '140px', justifyContent: 'center' }}
-                    >
-                        {saving ? <Loader2 className="animate-spin" /> : <Lock size={18} />}
-                        {saving ? 'Saving...' : 'Lock Portfolio'}
-                    </button>
-                </div>
-            </header>
+                {/* Locked Banner */}
+                {
+                    isLocked && (
+                        <div style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            borderRadius: '8px',
+                            padding: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            color: '#f87171'
+                        }}>
+                            <Lock size={24} />
+                            <div>
+                                <h3 style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>League is Locked</h3>
+                                <p style={{ fontSize: '0.875rem', opacity: 0.9 }}>
+                                    The admin has locked this league. Portfolios cannot be modified at this time.
+                                    {isOwner && " You can unlock it above to make changes."}
+                                </p>
+                            </div>
+                        </div>
+                    )
+                }
+            </header >
 
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 450px', gap: '2rem' }}>
 
                 {/* SEARCH AREA */}
-                <div className="glass-panel" style={{ padding: '1.5rem', height: 'fit-content' }}>
+                <div className="glass-panel" style={{ padding: '1.5rem', height: 'fit-content', opacity: isLocked ? 0.5 : 1, pointerEvents: isLocked ? 'none' : 'auto' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>Market</h2>
                     <div style={{ position: 'relative' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
                             <Search size={18} color="#a1a1aa" />
                             <input
                                 type="text"
-                                placeholder="Type symbol (e.g. NEBIUS, AAPL)..."
+                                placeholder={isLocked ? "Search disabled (Locked)" : "Type symbol (e.g. NEBIUS, AAPL)..."}
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
-                                style={{ background: 'none', border: 'none', outline: 'none', color: 'white', width: '100%' }}
+                                disabled={isLocked}
+                                style={{ background: 'none', border: 'none', outline: 'none', color: 'white', width: '100%', cursor: isLocked ? 'not-allowed' : 'text' }}
                             />
                             {isSearching && <Loader2 size={16} className="animate-spin" color="#a1a1aa" />}
                         </div>
                         {searchResults.length > 0 && (
-                            <div style={{ marginTop: '0.5rem', background: '#171717', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', overflow: 'hidden' }}>
+                            <div style={{ marginTop: '0.5rem', background: '#171717', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', overflow: 'hidden', position: 'absolute', width: '100%', zIndex: 10 }}>
                                 {searchResults.map((res) => (
                                     <button
                                         key={res.symbol}
                                         onClick={() => addStock(res)}
-                                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0.75rem', background: 'none', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'white', cursor: 'pointer', textAlign: 'left' }}
+                                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0.75rem', background: '#1e293b', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'white', cursor: 'pointer', textAlign: 'left' }}
                                     >
                                         <div>
                                             <span style={{ fontWeight: 'bold' }}>{res.displaySymbol}</span>
@@ -341,7 +339,7 @@ export default function DraftPage() {
                     </div>
 
                     {selectedStocks.length === 0 ? (
-                        <p style={{ color: '#a1a1aa', textAlign: 'center', padding: '2rem 0' }}>Search stocks to add them</p>
+                        <p style={{ color: '#a1a1aa', textAlign: 'center', padding: '2rem 0' }}>{isLocked ? "No stocks selected." : "Search stocks to add them"}</p>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {selectedStocks.map((stock) => (
@@ -358,21 +356,24 @@ export default function DraftPage() {
                                                     min="0"
                                                     max="100"
                                                     step="5"
+                                                    disabled={isLocked}
                                                     value={stock.allocation || 0}
                                                     onChange={e => updateAllocation(stock.symbol, e.target.value)}
                                                     style={{
                                                         flex: 1,
-                                                        accentColor: '#3b82f6',
+                                                        accentColor: isLocked ? '#64748b' : '#3b82f6',
                                                         height: '6px',
                                                         borderRadius: '3px',
-                                                        cursor: 'pointer'
+                                                        cursor: isLocked ? 'not-allowed' : 'pointer',
+                                                        opacity: isLocked ? 0.5 : 1
                                                     }}
                                                 />
                                                 <span style={{
                                                     minWidth: '3.5rem',
                                                     textAlign: 'right',
                                                     fontWeight: 'bold',
-                                                    fontSize: '1rem'
+                                                    fontSize: '1rem',
+                                                    color: isLocked ? '#94a3b8' : 'white'
                                                 }}>
                                                     {stock.allocation || 0}%
                                                 </span>
@@ -382,7 +383,17 @@ export default function DraftPage() {
                                             </span>
                                         </div>
                                     </div>
-                                    <button onClick={() => removeStock(stock.symbol)} style={{ marginLeft: '1rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>
+                                    <button
+                                        onClick={() => removeStock(stock.symbol)}
+                                        disabled={isLocked}
+                                        style={{
+                                            marginLeft: '1rem',
+                                            color: isLocked ? '#64748b' : '#ef4444',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: isLocked ? 'not-allowed' : 'pointer'
+                                        }}
+                                    >
                                         <X size={18} />
                                     </button>
                                 </div>
@@ -391,6 +402,6 @@ export default function DraftPage() {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
