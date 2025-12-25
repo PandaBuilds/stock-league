@@ -168,13 +168,41 @@ export default function LeaguePage() {
                     <Link href="/dashboard" style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem', display: 'block' }}>&larr; Back to Dashboard</Link>
                     <h1 className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: 'bold', lineHeight: '1.1' }}>{league?.name}</h1>
 
-                    {/* Admin Invite Link */}
-                    {isOwner && (
-                        <div style={{ marginTop: '0.5rem' }}>
-                            <button onClick={copyInvite} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.75rem' }}>
-                                {copied ? <Check size={14} /> : <Copy size={14} />}
-                                {copied ? 'Link Copied' : 'Invite Link'}
-                            </button>
+                    {/* Admin Access Code Display */}
+                    {isOwner && league?.join_code && (
+                        <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{
+                                background: 'rgba(255,255,255,0.1)',
+                                padding: '0.3rem 0.8rem',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.6rem'
+                            }}>
+                                <span style={{ color: '#a1a1aa', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Join Code:</span>
+                                <span style={{ fontSize: '1rem', fontWeight: 'bold', letterSpacing: '0.2rem', fontFamily: 'monospace' }}>{league.join_code}</span>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(league.join_code);
+                                        setCopied(true);
+                                        setTimeout(() => setCopied(false), 2000);
+                                    }}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        color: copied ? '#4ade80' : '#a1a1aa',
+                                        padding: '0.25rem',
+                                        marginLeft: '0.25rem'
+                                    }}
+                                    title="Copy Code"
+                                >
+                                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
