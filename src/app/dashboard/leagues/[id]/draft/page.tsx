@@ -137,8 +137,22 @@ export default function DraftPage() {
     };
 
     const updateAllocation = (symbol: string, val: string) => {
+        // Allow empty string to let user clear input
+        if (val === '') {
+            setSelectedStocks(selectedStocks.map(s =>
+                s.symbol === symbol ? { ...s, allocation: 0 } : s // or handle empty differently?? 
+                // Better: keep it as 0 or empty string if allowed.
+                // But my state expects number. Let's keep it 0 if empty for now or better
+            ));
+            return;
+        }
+
+        // Regex for valid number (positive float)
+        if (!/^\d*\.?\d{0,2}$/.test(val)) return;
+
+        // Prevent multiple decimals
         const num = parseFloat(val);
-        if (isNaN(num)) return;
+        if (isNaN(num) || num > 100) return; // Cap at 100 for percentage
 
         setSelectedStocks(selectedStocks.map(s =>
             s.symbol === symbol ? { ...s, allocation: num } : s
@@ -337,24 +351,34 @@ export default function DraftPage() {
                                             <span style={{ fontWeight: 'bold' }}>{stock.symbol}</span>
                                             <span style={{ fontSize: '0.875rem' }}>${stock.price?.toFixed(2)}</span>
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <input
-                                                type="number"
-                                                value={stock.allocation}
-                                                onChange={e => updateAllocation(stock.symbol, e.target.value)}
-                                                style={{
-                                                    width: '70px',
-                                                    padding: '0.25rem 0.5rem',
-                                                    background: 'rgba(0,0,0,0.3)',
-                                                    border: '1px solid rgba(255,255,255,0.2)',
-                                                    borderRadius: '4px',
-                                                    color: 'white',
-                                                    textAlign: 'right'
-                                                }}
-                                            />
-                                            <span style={{ color: '#a1a1aa' }}>%</span>
-                                            <span style={{ fontSize: '0.75rem', color: '#a1a1aa', marginLeft: 'auto' }}>
-                                                ≈ ${(league.budget * (stock.allocation / 100)).toLocaleString()}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    step="5"
+                                                    value={stock.allocation || 0}
+                                                    onChange={e => updateAllocation(stock.symbol, e.target.value)}
+                                                    style={{
+                                                        flex: 1,
+                                                        accentColor: '#3b82f6',
+                                                        height: '6px',
+                                                        borderRadius: '3px',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                />
+                                                <span style={{
+                                                    minWidth: '3.5rem',
+                                                    textAlign: 'right',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '1rem'
+                                                }}>
+                                                    {stock.allocation || 0}%
+                                                </span>
+                                            </div>
+                                            <span style={{ fontSize: '0.75rem', color: '#a1a1aa', minWidth: '80px', textAlign: 'right' }}>
+                                                ≈ ${(league.budget * ((stock.allocation || 0) / 100)).toLocaleString()}
                                             </span>
                                         </div>
                                     </div>
