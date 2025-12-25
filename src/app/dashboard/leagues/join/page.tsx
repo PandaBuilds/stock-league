@@ -56,6 +56,33 @@ export default function JoinLeaguePage() {
                 return;
             }
 
+
+            // 2.5 Ensure Profile Exists (Fix for FK constraint violation)
+            // New users might not have a profile yet if no trigger is set up.
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', user.id)
+                .single();
+
+            if (!profile) {
+                // Auto-create profile
+                const username = user.email?.split('@')[0] || `User${Math.floor(Math.random() * 1000)}`;
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert({
+                        id: user.id,
+                        username: username,
+                        avatar_url: ''
+                    });
+
+                if (profileError) {
+                    // Start soft, but log it. If username taken, we might retry, but simple for now.
+                    console.error("Failed to auto-create profile:", profileError);
+                    // We try to proceed, but it will likely fail at step 3.
+                }
+            }
+
             // 3. Join
             const { data: member, error: joinError } = await supabase
                 .from('league_members')
