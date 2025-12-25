@@ -47,7 +47,7 @@ export default function LeagueList() {
                     <Link href="/dashboard/leagues/join" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', color: 'white' }}>
                         Join League
                     </Link>
-                    <Link href="/dashboard/leagues/create" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                    <Link href="/dashboard/leagues/create" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', background: 'linear-gradient(135deg, #34d399 0%, #22d3ee 100%)', color: '#0f172a', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 'bold' }}>
                         <Plus size={16} /> Create League
                     </Link>
                 </div>

@@ -147,3 +147,9 @@ body {
         padding: 3rem;
     }
 }
+
+/* Global Link Reset */
+a {
+    color: inherit;
+    text-decoration: none;
+}

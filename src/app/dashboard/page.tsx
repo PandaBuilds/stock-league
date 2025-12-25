@@ -122,7 +122,7 @@ export default function DashboardPage() {
 
                 <Link href="/dashboard/leagues" className="glass-panel" style={{ padding: '1.5rem', transition: 'transform 0.2s', display: 'block' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                        <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(96, 165, 250, 0.2)', color: '#60a5fa' }}><Users size={24} /></div>
+                        <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(52, 211, 153, 0.2)', color: '#34d399' }}><Users size={24} /></div>
                         <span style={{ color: '#a1a1aa' }}>Active Leagues</span>
                     </div>
                     <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.activeLeagues}</div>
