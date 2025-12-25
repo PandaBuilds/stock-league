@@ -288,10 +288,10 @@ export default function DraftPage() {
                 }
             </header >
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 450px', gap: '2rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
 
                 {/* SEARCH AREA */}
-                <div className="glass-panel" style={{ padding: '1.5rem', height: 'fit-content', opacity: isLocked ? 0.5 : 1, pointerEvents: isLocked ? 'none' : 'auto' }}>
+                <div className="glass-panel" style={{ flex: '1 1 300px', padding: '1.5rem', height: 'fit-content', opacity: isLocked ? 0.5 : 1, pointerEvents: isLocked ? 'none' : 'auto' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>Market</h2>
                     <div style={{ position: 'relative' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
@@ -327,7 +327,7 @@ export default function DraftPage() {
                 </div>
 
                 {/* PORTFOLIO AREA */}
-                <div className="glass-panel" style={{ padding: '1.5rem', height: 'fit-content' }}>
+                <div className="glass-panel" style={{ flex: '1 1 400px', padding: '1.5rem', height: 'fit-content' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                         <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Allocations</h2>
                         <span style={{
