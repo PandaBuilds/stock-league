@@ -126,28 +126,7 @@ export default function LeaguePage() {
         if (!window.confirm("ARE YOU SURE? This will permanently delete this league and all portfolios within it. This action cannot be undone.")) return;
         setDeleting(true);
         try {
-            // 1. Get all related IDs first
-            const { data: members } = await supabase.from('league_members').select('id').eq('league_id', league.id);
-            const memberIds = members?.map(m => m.id) || [];
-
-            let portfolioIds: any[] = [];
-            if (memberIds.length > 0) {
-                const { data: portfolios } = await supabase.from('portfolios').select('id').in('member_id', memberIds);
-                portfolioIds = portfolios?.map(p => p.id) || [];
-            }
-
-            // 2. Delete in order (Holdings -> Portfolios -> Members -> League)
-            // We verify each step but continue if "success" (even if 0 rows)
-
-            if (portfolioIds.length > 0) {
-                await supabase.from('holdings').delete().in('portfolio_id', portfolioIds);
-                await supabase.from('portfolios').delete().in('id', portfolioIds);
-            }
-
-            if (memberIds.length > 0) {
-                await supabase.from('league_members').delete().eq('league_id', league.id);
-            }
-
+            // Delete League (Database CASCADE handles the rest!)
             const { error: leagueErr } = await supabase.from('leagues').delete().eq('id', league.id);
 
             if (leagueErr) {
