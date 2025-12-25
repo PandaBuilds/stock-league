@@ -132,6 +132,14 @@ export default function CreateLeaguePage() {
                 </div>
 
                 <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1a1aa' }}>Duration</label>
+                    <select
+                        value={formData.durationMonths}
+                        onChange={e => setFormData({ ...formData, durationMonths: Number(e.target.value) })}
+                        style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                    >
+                        <option value={1}>1 Month (Sprint)</option>
+                        <option value={3}>3 Months (Quarterly)</option>
                         <option value={12}>1 Year (Marathon)</option>
                     </select>
                 </div>
