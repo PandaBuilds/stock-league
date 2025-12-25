@@ -47,14 +47,17 @@ export default function LeaguePage() {
 
         if (members) {
             const sorted = members
-                .map(m => ({
-                    memberId: m.id,
-                    userId: m.user_id,
-                    username: m.profiles?.username || 'Anonymous',
-                    avatar: m.profiles?.avatar_url,
-                    totalValue: m.portfolios?.[0]?.total_value || 0,
-                    cash: m.portfolios?.[0]?.cash_balance || 0,
-                }))
+                .map(m => {
+                    const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
+                    return {
+                        memberId: m.id,
+                        userId: m.user_id,
+                        username: profile?.username || 'Anonymous',
+                        avatar: profile?.avatar_url,
+                        totalValue: m.portfolios?.[0]?.total_value || 0,
+                        cash: m.portfolios?.[0]?.cash_balance || 0,
+                    };
+                })
                 .sort((a, b) => b.totalValue - a.totalValue);
 
             setLeaderboard(sorted);
