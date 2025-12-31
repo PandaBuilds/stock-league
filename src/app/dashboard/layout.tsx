@@ -1,6 +1,5 @@
 'use client';
 
-'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -49,9 +48,11 @@ export default function DashboardLayout({
         <div className="layout-container">
             {/* Desktop Sidebar */}
             <aside className="desktop-sidebar glass-panel">
-                <h1 className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '3rem', paddingLeft: '0.75rem' }}>
-                    Stock League
-                </h1>
+                <Link href="/dashboard" style={{ display: 'block', textDecoration: 'none' }}>
+                    <h1 className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '3rem', paddingLeft: '0.75rem', cursor: 'pointer' }}>
+                        Stock League
+                    </h1>
+                </Link>
 
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
                     {navItems.map((item) => {
