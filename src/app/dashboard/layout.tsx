@@ -48,7 +48,7 @@ export default function DashboardLayout({
         <div className="layout-container">
             {/* Desktop Sidebar */}
             <aside className="desktop-sidebar glass-panel">
-                <Link href="/dashboard" style={{ display: 'block', textDecoration: 'none' }}>
+                <Link href="/" style={{ display: 'block', textDecoration: 'none' }}>
                     <h1 className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '3rem', paddingLeft: '0.75rem', cursor: 'pointer' }}>
                         Stock League
                     </h1>
